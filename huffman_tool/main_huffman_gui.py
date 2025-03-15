@@ -65,12 +65,11 @@ def decompress_file():
         decoded_display.insert(tk.END, "Decoded Text:\n")
         decoded_display.insert(tk.END, decoded_text)
 
-        status_label.config(text="File Decompressed Successfully! Output: decompressed.txt")
+        status_label.config(text="File Decompressed Successfully!")
     
     except FileNotFoundError:
         status_label.config(text="Error: No compressed file found.")
 
-# GUI Setup
 root = tk.Tk()
 root.title("Huffman Compression Tool")
 
