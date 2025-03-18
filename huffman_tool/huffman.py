@@ -1,5 +1,5 @@
 import heapq
-import os
+from bitarray import bitarray
 from graphviz import Digraph
 
 class Node:
@@ -49,26 +49,35 @@ def huffman_compress(text):
     huffman_tree = build_huffman_tree(freq_table)
     huffman_codes = generate_huffman_codes(huffman_tree)
 
-    encoded_text = "".join(huffman_codes[char] for char in text)
-    padding = 8 - len(encoded_text) % 8
-    encoded_text += "0" * padding
+    # Use a bitarray to accumulate the binary data
+    encoded_bits = bitarray()
 
-    byte_array = bytearray()
-    for i in range(0, len(encoded_text), 8):
-        byte_array.append(int(encoded_text[i:i+8], 2))
+    for char in text:
+        encoded_bits.extend(huffman_codes[char])  # Add the Huffman code bits to the bitarray
 
-    return huffman_codes, bytes(byte_array), padding
+    padding = 8 - len(encoded_bits) % 8
+    encoded_bits.extend([0] * padding)
+    # Add padding if necessary
+
+    # Convert the bitarray to bytes
+    byte_array = encoded_bits.tobytes()
+
+    return huffman_codes, byte_array, padding
 
 def huffman_decompress(compressed_data, huffman_codes, padding):
     reverse_codes = {v: k for k, v in huffman_codes.items()}
-    binary_string = "".join(f"{byte:08b}" for byte in compressed_data)
+    
+    # Convert the byte data to a bitarray
+    binary_string = bitarray()
+    binary_string.frombytes(compressed_data)
+    
+    # Remove the padding bits
     binary_string = binary_string[:-padding]
-    # Remove padding
 
     decoded_text = ""
     temp_code = ""
     for bit in binary_string:
-        temp_code += bit
+        temp_code += str(bit)
         if temp_code in reverse_codes:
             decoded_text += reverse_codes[temp_code]
             temp_code = ""
