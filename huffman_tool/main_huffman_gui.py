@@ -1,3 +1,8 @@
+# Huffman Commpression Tool
+# Josephine Choi
+# Johnson Tran
+# Alex Islas
+
 import tkinter as tk
 from tkinter import filedialog
 import pickle
