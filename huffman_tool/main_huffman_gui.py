@@ -6,6 +6,7 @@
 import tkinter as tk
 from tkinter import filedialog
 import pickle
+import os
 from huffman import huffman_compress, huffman_decompress
 from huffman import build_frequency_table, build_huffman_tree, save_huffman_tree_image
 
@@ -22,7 +23,8 @@ def compress_file():
     huffman_tree = build_huffman_tree(build_frequency_table(text))
 
     # Save the compressed data to file
-    with open("compressed.bin", "wb") as compressed_file:
+    compressed_file_path = "compressed.bin"
+    with open(compressed_file_path, "wb") as compressed_file:
         compressed_file.write(compressed_data)
 
     # Save the Huffman codes and padding info
@@ -30,10 +32,22 @@ def compress_file():
         pickle.dump((huffman_codes, padding), code_file)
 
     # Calculate file sizes
-    original_size = len(text.encode('utf-8'))  # in bytes
-    compressed_size = len(compressed_data)
+    # Checks to see if compressed file exists then measures size
+    if os.path.exists(compressed_file_path):
+        compressed_size = os.path.getsize(compressed_file_path)
+    else:
+        compressed_size = 0 
+    original_size = os.path.getsize(file_path)  # in bytes
     compression_ratio = (compressed_size / original_size) * 100 if original_size > 0 else 0  # as a percentage
 
+    # Size Labels
+    original_size_label.config(text=f"Original Size: {original_size} bytes")
+    compressed_size_label.config(text=f"Compressed Size: {compressed_size} bytes")
+    compression_ratio_label.config(text=f"Compression Ratio: {compression_ratio:.2f}%")
+
+    # Updates GUI 
+    root.update_idletasks()
+    
     # Display Huffman codes in the GUI
     code_display.delete("1.0", tk.END)
     code_display.insert(tk.END, "Huffman Codes:\n")
@@ -43,11 +57,9 @@ def compress_file():
     # Visualize the Huffman Tree and save it as PNG
     save_huffman_tree_image(huffman_tree)
 
-    # Update status and size labels
+    # Update status 
     status_label.config(text="File Compressed Successfully! Output: compressed.bin and huffman_tree.png")
-    original_size_label.config(text=f"Original Size: {original_size} bytes")
-    compressed_size_label.config(text=f"Compressed Size: {compressed_size} bytes")
-    compression_ratio_label.config(text=f"Compression Ratio: {compression_ratio:.2f}%")
+    
 
 def decompress_file():
     try:
